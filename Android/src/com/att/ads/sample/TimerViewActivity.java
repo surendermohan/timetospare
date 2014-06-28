@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -24,13 +25,13 @@ import com.att.ads.ATTAdViewError;
 import com.att.ads.listeners.ATTAdViewListener;
 
 /**
- *
+ * 
  * Displays Ad View based on selected category and settings. Create ATTAdView
- * object by passing the app key , secret key, UDID and Category. Finally add your view
- * object to adFrameLayout.
- *
+ * object by passing the app key , secret key, UDID and Category. Finally add
+ * your view object to adFrameLayout.
+ * 
  * @author ATT
- *
+ * 
  */
 public class TimerViewActivity extends Activity implements ATTAdViewListener {
 
@@ -40,6 +41,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 	private String[] categoryItems = null;
 	private ATTAdView attAdView;
 	private LinearLayout adFrameLayout;
+	private ProgressBar adProgressBar;
 	private String appKey = null;
 	private String secret = null;
 
@@ -54,76 +56,83 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.adsview_tab_layout);
+		setContentView(R.layout.time_view_tab_layout);
 
-		
-		
-		categoryItems = getResources().getStringArray(R.array.categoryTypes);
-		selectedCategory = categoryItems[0];
 		adFrameLayout = (LinearLayout) findViewById(R.id.frameAdContent);
 
-		btnGetAd = (Button) findViewById(R.id.btnGetAd);
-		btnGetAd.setOnClickListener(onClickListener);
-
-		selectCategoryView = (TextView) findViewById(R.id.selectCategory);
-		selectCategoryView.setText(selectedCategory);
-		selectCategoryView.setOnClickListener(onClickListener);
-		
+		/*
+		 * categoryItems = getResources().getStringArray(R.array.categoryTypes);
+		 * selectedCategory = categoryItems[0]; adFrameLayout = (LinearLayout)
+		 * findViewById(R.id.frameAdContent);
+		 * 
+		 * btnGetAd = (Button) findViewById(R.id.btnGetAd);
+		 * btnGetAd.setOnClickListener(onClickListener);
+		 * 
+		 * selectCategoryView = (TextView) findViewById(R.id.selectCategory);
+		 * selectCategoryView.setText(selectedCategory);
+		 * selectCategoryView.setOnClickListener(onClickListener);
+		 */
 
 		/*
-		 * NOTE:
-		 * We are using the obfuscated App Key and App Secret in the below declaration.
-		 * These will be unobfuscated while calling the ATTAdView constructor.
-		 * you can use your own encryption/decreption algorithm to manage data security.
-		 *
+		 * NOTE: We are using the obfuscated App Key and App Secret in the below
+		 * declaration. These will be unobfuscated while calling the ATTAdView
+		 * constructor. you can use your own encryption/decreption algorithm to
+		 * manage data security.
+		 * 
 		 * Below commented getEncryptedAppAndSecret method is very useful to
 		 * generate encrypted app and secret key values using AES algorithm.
-		 * This is one of the powerful and secure store data on device
-		 * 1.First you should uncomment the method.
-		 * 2.Go to below of the class for this  method implementation.
-		 * 3.provide your original app key and secret key.
-		 * 4.Run this sample app on device/Emulator and find debug log with this keys (en_appKey,en_secret).
-		 * 5. copy those values into string.xml like below
-		 * 		<string name="appKey">4568b859645847b01b6d0937d63c5083e697bd454848e104fe6c89649cae89d32a8a60b697a03b75312d7e593ba8f124329</string>
-		 * 		<string name="secret">zxb3fd2555259b664e35f445243cb1fd24a228ace99b8cd6d3e264618e549c6000</string>
-		 * 6.Decrypt an app and secret key values like try/catch block.
-		 * 7.Remove getEncryptedAppAndSecret method declaration and implementation in  this class.
+		 * This is one of the powerful and secure store data on device 1.First
+		 * you should uncomment the method. 2.Go to below of the class for this
+		 * method implementation. 3.provide your original app key and secret
+		 * key. 4.Run this sample app on device/Emulator and find debug log with
+		 * this keys (en_appKey,en_secret). 5. copy those values into string.xml
+		 * like below <string name="appKey">4568
+		 * b859645847b01b6d0937d63c5083e697bd454848e104fe6c89649cae89d32a8a60b697a03b75312d7e593ba8f124329
+		 * </string> <string name="secret">
+		 * zxb3fd2555259b664e35f445243cb1fd24a228ace99b8cd6d3e264618e549c6000
+		 * </string> 6.Decrypt an app and secret key values like try/catch
+		 * block. 7.Remove getEncryptedAppAndSecret method declaration and
+		 * implementation in this class.
 		 */
 
 		// getEncryptedAppAndSecret();
 
-
-		/*try {
-			appKey = AdsEncryptDecrypt.getDecryptedValue(getResources().getString(R.string.appKey),
-					AdsEncryptDecrypt.getSecretKeySpec("app_key"));
-			secret = AdsEncryptDecrypt.getDecryptedValue(getResources().getString(R.string.secret),
-					AdsEncryptDecrypt.getSecretKeySpec("secret_key"));
-		} catch (Exception e) {
-			Log.e(TAG, "Eror :" + e.fillInStackTrace());
-		}*/
+		/*
+		 * try { appKey =
+		 * AdsEncryptDecrypt.getDecryptedValue(getResources().getString
+		 * (R.string.appKey), AdsEncryptDecrypt.getSecretKeySpec("app_key"));
+		 * secret =
+		 * AdsEncryptDecrypt.getDecryptedValue(getResources().getString(
+		 * R.string.secret), AdsEncryptDecrypt.getSecretKeySpec("secret_key"));
+		 * } catch (Exception e) { Log.e(TAG, "Eror :" + e.fillInStackTrace());
+		 * }
+		 */
 		appKey = "awxnxyq1wuzusxmj0hictbxnb6kxgmgf";
 		secret = "vygskuuavkw2dv7otvkzixi8bg3pvtbg";
-		
+
 		// Category always in lower case
-		if(null == appKey || null == secret){
+		if (null == appKey || null == secret) {
 			Log.e(TAG, "Eror :Either App Key or secret or both are null.");
 			return;
 		}
-		attAdView = new ATTAdView(this, appKey, secret, getResources().getString(R.string.udid),
-				selectedCategory);
-		//Ad reload time set to 60 seconds.
+		attAdView = new ATTAdView(this, appKey, secret, getResources()
+				.getString(R.string.udid), "auto");
+		// Ad reload time set to 60 seconds.
 		attAdView.setAdReloadPeriod(60);
-		//This method will dynamically read the device width & height and set the accordingly.
+		// This method will dynamically read the device width & height and set
+		// the accordingly.
 		setAdLayoutParams();
-		//Simply AppDeveloper can also set the layout parameters as below instead the above.
-		//attAdView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 100));
+		// Simply AppDeveloper can also set the layout parameters as below
+		// instead the above.
+		// attAdView.setLayoutParams(new
+		// ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 100));
 		adFrameLayout.addView(attAdView);
 		attAdView.setAdViewListener(this);
-		//Setting the Ad View background to transparent.
+		// Setting the Ad View background to transparent.
 		attAdView.setBackgroundColor(Color.TRANSPARENT);
 		attAdView.initOrRefresh();
-	}
 
+	}
 
 	/**
 	 * on click event listener for views
@@ -148,38 +157,46 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 			// setting tab parameters
 			if (AdsApplication.getInstance().getKeywords() != null
 					&& AdsApplication.getInstance().getKeywords().length() > 0) {
-				attAdView.setKeywords(AdsApplication.getInstance().getKeywords());
+				attAdView.setKeywords(AdsApplication.getInstance()
+						.getKeywords());
 			}
 			if (AdsApplication.getInstance().getZip() > 0) {
 				attAdView.setZipCode(AdsApplication.getInstance().getZip());
 			}
 			if (AdsApplication.getInstance().getAgeGroup() != null
 					&& AdsApplication.getInstance().getAgeGroup().length() > 0) {
-				attAdView.setAgeGroup(AdsApplication.getInstance().getAgeGroup());
+				attAdView.setAgeGroup(AdsApplication.getInstance()
+						.getAgeGroup());
 			}
 			if (AdsApplication.getInstance().getMaxHeight() > 0) {
-				attAdView.setMaxHeight(AdsApplication.getInstance().getMaxHeight());
+				attAdView.setMaxHeight(AdsApplication.getInstance()
+						.getMaxHeight());
 			}
 			if (AdsApplication.getInstance().getMaxWidth() > 0) {
-				attAdView.setMaxWidth(AdsApplication.getInstance().getMaxWidth());
+				attAdView.setMaxWidth(AdsApplication.getInstance()
+						.getMaxWidth());
 			}
 			if (AdsApplication.getInstance().getLatitude() != 0.0) {
-				attAdView.setLatitude(AdsApplication.getInstance().getLatitude());
+				attAdView.setLatitude(AdsApplication.getInstance()
+						.getLatitude());
 			}
 			if (AdsApplication.getInstance().getLongitude() != 0.0) {
-				attAdView.setLongitude(AdsApplication.getInstance().getLongitude());
+				attAdView.setLongitude(AdsApplication.getInstance()
+						.getLongitude());
 			}
 			attAdView.initOrRefresh();
 
-			if(AdsApplication.getInstance().getMaxWidth() >= 300 &&
-					AdsApplication.getInstance().getMaxHeight() >= 250){
+			if (AdsApplication.getInstance().getMaxWidth() >= 300
+					&& AdsApplication.getInstance().getMaxHeight() >= 250) {
 				openFullScreenAd();
-			}else {
+			} else {
 				if (attAdView.getParent() != null) {
-					((ViewGroup)attAdView.getParent()).removeAllViews();
+					((ViewGroup) attAdView.getParent()).removeAllViews();
 				}
 				setAdLayoutParams();
-				//attAdView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 100));
+				// attAdView.setLayoutParams(new
+				// ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+				// 100));
 				adFrameLayout.addView(attAdView);
 			}
 
@@ -187,27 +204,28 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 			Log.e(TAG, "Eror :" + e.fillInStackTrace());
 		}
 	}
+
 	/**
 	 * Returns category.
-	 *
+	 * 
 	 * @return
 	 */
 	private Dialog getCategory() {
 
 		AlertDialog.Builder repeatBuilder = new AlertDialog.Builder(this);
 		repeatBuilder.setTitle("Choose Category :");
-		repeatBuilder.setItems(categoryItems, new DialogInterface.OnClickListener() {
+		repeatBuilder.setItems(categoryItems,
+				new DialogInterface.OnClickListener() {
 
-			public void onClick(DialogInterface dialog, int item) {
-				selectedCategory = categoryItems[item];
-				selectCategoryView.setText(selectedCategory);
-				dialog.cancel();
-			}
+					public void onClick(DialogInterface dialog, int item) {
+						selectedCategory = categoryItems[item];
+						selectCategoryView.setText(selectedCategory);
+						dialog.cancel();
+					}
 
-		});
+				});
 		return repeatBuilder.create();
 	}
-
 
 	/**
 	 * Nullifying the parameters
@@ -245,8 +263,8 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		windowManager.getDefaultDisplay().getMetrics(metrics);
 		int height = 50;
 
-		Log.d(TAG, "Height: "+metrics.heightPixels);
-		Log.d(TAG, "Width: "+metrics.widthPixels);
+		Log.d(TAG, "Height: " + metrics.heightPixels);
+		Log.d(TAG, "Width: " + metrics.widthPixels);
 
 		int maxSize = metrics.heightPixels;
 		if (maxSize < metrics.widthPixels) {
@@ -261,27 +279,30 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 			height = 120;
 		}
 
+		// Ad size - Max height and Max width that the component can allow the
+		// ad image
+		// Note: The minSize and maxSize parameters can be used to tune the ads
+		// received from the server based on the requirements of the device,
+		// but it is not guaranteed that the received ads will be of that size.
+		attAdView.setLayoutParams(new ViewGroup.LayoutParams(
+				ViewGroup.LayoutParams.FILL_PARENT, height + (height / 2)));
 
-		//Ad size - Max height and Max width that the component can allow the ad image
-		//Note: The minSize and maxSize parameters can be used to tune the ads
-		//received from the server based on the requirements of the device,
-		//but it is not guaranteed that the received ads will be of that size.
-		attAdView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height+(height/2)));
-
-		/*ViewGroup.LayoutParams lp = attAdView.getLayoutParams();
-		if (lp == null) {
-			lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
-			attAdView.setLayoutParams(lp);
-		}*/
+		/*
+		 * ViewGroup.LayoutParams lp = attAdView.getLayoutParams(); if (lp ==
+		 * null) { lp = new
+		 * ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
+		 * attAdView.setLayoutParams(lp); }
+		 */
 
 		// Max size can be useful, but if you don't have ads large enough for
 		// all devices,
 		// it can result in no ad being shown, so use it sparingly.
-		//attAdView.setMaxWidth(metrics.widthPixels);
-		//attAdView.setMaxHeight(height);
+		// attAdView.setMaxWidth(metrics.widthPixels);
+		// attAdView.setMaxHeight(height);
 
 		attAdView.requestLayout();
 	}
+
 	/**
 	 * Success call back method. Method triggers when the ad is received
 	 * successfully and rendered. Generally this is the place holder for
@@ -292,6 +313,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		Log.d(TAG, "onSuccess()");
 		AdsApplication.getInstance().setResponse(adViewResponse);
 	}
+
 	/**
 	 * Error call back method. Method triggers when the ad is failed to receive
 	 * valid response. Generally this is the place holder for application
@@ -329,9 +351,10 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		if (null != attAdView) {
 			// Starts the Reload timer and all listeners
 			attAdView.startRefresh();
-			//Following is only for sample application.
-			//Automatically calls the ATTAdView with out clicking of GetAd button.
-			if(AdsApplication.getInstance().isChangeInSettings()){
+			// Following is only for sample application.
+			// Automatically calls the ATTAdView with out clicking of GetAd
+			// button.
+			if (AdsApplication.getInstance().isChangeInSettings()) {
 				AdsApplication.getInstance().setChangeInSettings(false);
 				onSettingsChange();
 			}
@@ -345,9 +368,9 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 	@SuppressWarnings("unused")
 	private void getEncryptedAppAndSecret() {
 		/*
-		 *   String appKey = "provide your appKey ";
-		 *   String secret = "provide your secret key";
-		 *   For example like below and those are dummy values.
+		 * String appKey = "provide your appKey "; String secret =
+		 * "provide your secret key"; For example like below and those are dummy
+		 * values.
 		 */
 
 		try {
@@ -363,49 +386,63 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 
 	private void openFullScreenAd() {
 
-		//ImageButton closeButton = null;
+		// ImageButton closeButton = null;
 		Button closeButton = null;
 
-		//show dialog
+		// show dialog
 		final Dialog dialog;
 
 		dialog = new Dialog(this, android.R.style.Theme_NoTitleBar);
 
 		if (attAdView.getParent() != null) {
-			((ViewGroup)attAdView.getParent()).removeAllViews();
+			((ViewGroup) attAdView.getParent()).removeAllViews();
 		}
 
 		final RelativeLayout mainLayout = new RelativeLayout(this);
-		//mainLayout.setBackgroundColor(Color.TRANSPARENT);
+		// mainLayout.setBackgroundColor(Color.TRANSPARENT);
 		mainLayout.setLayoutParams(new ViewGroup.LayoutParams(
-				ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+				ViewGroup.LayoutParams.FILL_PARENT,
+				ViewGroup.LayoutParams.FILL_PARENT));
 		RelativeLayout.LayoutParams adLayoutParams = new RelativeLayout.LayoutParams(
-				ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
-		adLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
-		adLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+				ViewGroup.LayoutParams.FILL_PARENT,
+				ViewGroup.LayoutParams.FILL_PARENT);
+		adLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL,
+				RelativeLayout.TRUE);
+		adLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL,
+				RelativeLayout.TRUE);
 		attAdView.setLayoutParams(adLayoutParams);
 		mainLayout.addView(attAdView);
 
-		if(closeButton == null) {
-			//Below code base is to add the close image button at top right corner.
-			/*closeButton = new ImageButton(this);
-			closeButton.setImageResource(R.drawable.popup_close_btn);
-			RelativeLayout.LayoutParams closeLayoutParams = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-			closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-			closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
-			closeButton.setLayoutParams(closeLayoutParams);*/
+		if (closeButton == null) {
+			// Below code base is to add the close image button at top right
+			// corner.
+			/*
+			 * closeButton = new ImageButton(this);
+			 * closeButton.setImageResource(R.drawable.popup_close_btn);
+			 * RelativeLayout.LayoutParams closeLayoutParams = new
+			 * RelativeLayout.LayoutParams(
+			 * RelativeLayout.LayoutParams.WRAP_CONTENT,
+			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
+			 * closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP,
+			 * RelativeLayout.TRUE);
+			 * closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT,
+			 * RelativeLayout.TRUE);
+			 * closeButton.setLayoutParams(closeLayoutParams);
+			 */
 
-			//Below code base is to add the close button at bottom.
+			// Below code base is to add the close button at bottom.
 			closeButton = new Button(this);
 			closeButton.setText("Close");
 			RelativeLayout.LayoutParams closeLayoutParams = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-			closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-			closeLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT);
+			closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM,
+					RelativeLayout.TRUE);
+			closeLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL,
+					RelativeLayout.TRUE);
 			closeButton.setLayoutParams(closeLayoutParams);
 		}
-		closeButton.setOnClickListener(new View.OnClickListener(){
+		closeButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				Log.d(TAG, "Close Button onClick");
