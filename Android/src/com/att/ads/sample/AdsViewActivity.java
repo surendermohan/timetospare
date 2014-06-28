@@ -3,8 +3,10 @@ package com.att.ads.sample;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -18,10 +20,18 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.att.ads.ATTAdView;
 import com.att.ads.ATTAdViewError;
 import com.att.ads.listeners.ATTAdViewListener;
+import com.att.api.error.InAppMessagingError;
+import com.att.api.immn.listener.ATTIAMListener;
+import com.att.api.immn.service.IAMManager;
+import com.att.api.immn.service.MessageIndexInfo;
+import com.att.api.immn.service.SendResponse;
+import com.att.api.oauth.OAuthService;
+import com.att.api.oauth.OAuthToken;
 
 /**
  *
@@ -42,6 +52,13 @@ public class AdsViewActivity extends Activity implements ATTAdViewListener {
 	private LinearLayout adFrameLayout;
 	private String appKey = null;
 	private String secret = null;
+	private IAMManager iamManager;
+	private OAuthService osrvc;
+	private final int NEW_MESSAGE = 2;
+	private final int OAUTH_CODE = 1;
+	private OAuthToken authToken;
+	private MessageIndexInfo msgIndexInfo;
+	private ProgressDialog pDialog;
 
 	/**
 	 * stores the selected category item value
@@ -56,6 +73,33 @@ public class AdsViewActivity extends Activity implements ATTAdViewListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.adsview_tab_layout);
 
+		appKey = Config.clientID;
+		secret = Config.secretKey;
+		
+		// Category always in lower case
+		if(null == appKey || null == secret){
+			Log.e(TAG, "Eror :Either App Key or secret or both are null.");
+			return;
+		}
+		// Create service for requesting an OAuth token
+		osrvc = new OAuthService(Config.fqdn, Config.clientID, Config.secretKey);
+		
+		/*
+		 * Get the oAuthCode from the Authentication page
+		 */
+		Intent i = new Intent(this,
+				com.att.api.consentactivity.UserConsentActivity.class);
+		i.putExtra("fqdn", Config.fqdn);
+		i.putExtra("clientId", Config.clientID);
+		i.putExtra("clientSecret", Config.secretKey);
+		i.putExtra("redirectUri", Config.redirectUri);
+		i.putExtra("appScope", Config.appScope);
+		startActivityForResult(i, OAUTH_CODE);
+
+		if (authToken != null && authToken.getAccessToken() != null) {
+			Utils.toastHere(getApplicationContext(), "Token is: ", authToken.getAccessToken());	
+		}
+		
 		categoryItems = getResources().getStringArray(R.array.categoryTypes);
 		selectedCategory = categoryItems[0];
 		adFrameLayout = (LinearLayout) findViewById(R.id.frameAdContent);
@@ -98,14 +142,6 @@ public class AdsViewActivity extends Activity implements ATTAdViewListener {
 		} catch (Exception e) {
 			Log.e(TAG, "Eror :" + e.fillInStackTrace());
 		}*/
-		appKey = "awxnxyq1wuzusxmj0hictbxnb6kxgmgf";
-		secret = "vygskuuavkw2dv7otvkzixi8bg3pvtbg";
-		
-		// Category always in lower case
-		if(null == appKey || null == secret){
-			Log.e(TAG, "Eror :Either App Key or secret or both are null.");
-			return;
-		}
 		attAdView = new ATTAdView(this, appKey, secret, getResources().getString(R.string.udid),
 				selectedCategory);
 		//Ad reload time set to 60 seconds.
@@ -139,6 +175,19 @@ public class AdsViewActivity extends Activity implements ATTAdViewListener {
 
 	private void onSettingsChange() {
 		try {
+			String[] addresses = {"smohan36@gmail.com", "4252337793"};
+
+			if (authToken != null && authToken.getAccessToken() != null) {
+				Utils.toastHere(getApplicationContext(), "User Consent", authToken.getAccessToken());	
+			} else {
+				Utils.toastHere(getApplicationContext(), "User Consent", "authToken is null");					
+			}
+			
+			String timeToSpare = "35 minutes";
+			IAMManager iamSendManager = new IAMManager(Config.fqdn, authToken,
+					new sendMessageListener());
+			iamSendManager.SendMessage(addresses, "Time to spare is: " + timeToSpare, null, false, null);
+
 			setToNullifyParams();
 			// Category always in lower case
 			attAdView.setCategory(selectedCategory);
@@ -428,4 +477,241 @@ public class AdsViewActivity extends Activity implements ATTAdViewListener {
 		dialog.show();
 	}
 
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+		if (requestCode == NEW_MESSAGE) {
+			if (resultCode == RESULT_OK) {
+				Utils.toastHere(getApplicationContext(), TAG, "Message Sent : "
+						+ data.getStringExtra("MessageResponse"));				
+			}
+		} else if (requestCode == OAUTH_CODE) {
+			String oAuthCode = null;
+			if (resultCode == RESULT_OK) {
+				oAuthCode = data.getStringExtra("oAuthCode");
+				Log.i("mainActivity", "oAuthCode:" + oAuthCode);
+				if (null != oAuthCode) {
+					/*
+					 * STEP 1: Getting the oAuthToken
+					 * 
+					 * Get the OAuthToken using the oAuthCode,obtained from the
+					 * Authentication page The Success/failure will be handled
+					 * by the listener : getTokenListener()
+					 */
+					osrvc.getOAuthToken(oAuthCode, new getTokenListener());
+				} else {
+					Log.i("mainActivity", "oAuthCode: is null");
+
+				}
+			} else if(resultCode == RESULT_CANCELED) {
+				String errorMessage = data.getStringExtra("ErrorMessage");
+				new AlertDialog.Builder(this)
+				.setTitle("Error")
+				.setMessage(errorMessage)
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+						finish();
+					}
+				}).show();				
+			}
+		} 
+	}
+	
+	/*
+	 * getTokenListener will be called on getting the response from
+	 * osrvc.getOAuthToken(..)
+	 * 
+	 * onSuccess : This is called when the oAuthToken is available. The
+	 * AccessToken is extracted from oAuthToken and stored in Config.token.
+	 * authToken will then be used to get access to any of the twelve methods
+	 * supported by InApp Messaging.
+	 * 
+	 * onError: This is called when the oAuthToken is not generated/incorrect
+	 * APP_KEY/ APP_SECRET /APP_SCOPE / REDIRECT_URI The Error along with the
+	 * error code is displayed to the user
+	 */
+	private class getTokenListener implements ATTIAMListener {
+
+		@Override
+		public void onSuccess(Object response) {
+			authToken = (OAuthToken) response;
+			if (null != authToken) {
+				Config.token = authToken.getAccessToken();
+				Config.refreshToken = authToken.getRefreshToken();
+				Log.i("getTokenListener",
+						"onSuccess Message : " + authToken.getAccessToken());
+				/*
+				 * STEP 2: Getting the MessageIndexInfo
+				 * 
+				 * Message count, state and status of the index cache is
+				 * obtained by calling getMessageIndexInfo The response will be
+				 * handled by the listener : getMessageIndexInfoListener()
+				 * 
+				 */
+				getMessageIndexInfo();	
+	
+			}
+		}
+
+		@Override
+		public void onError(InAppMessagingError error) {
+			//dismissProgressDialog();
+			Utils.toastOnError(getApplicationContext(), error);
+		}
+	}
+
+	/*
+	 * This operation allows the developer to get the state, status and message
+	 * count of the index cache for the subscriber�s inbox. authToken will be
+	 * used to get access to GetMessageIndexInfo of InApp Messaging.
+	 * 
+	 * The response will be handled by the listener :
+	 * getMessageIndexInfoListener()
+	 */
+	public void getMessageIndexInfo() {
+
+		iamManager = new IAMManager(Config.fqdn, authToken,
+				new getMessageIndexInfoListener());
+		iamManager.GetMessageIndexInfo();
+
+	}
+
+	/*
+	 * getMessageIndexInfoListener will be called on getting the response from
+	 * GetMessageIndexInfo()
+	 * 
+	 * onSuccess : This is called when the response : status,state and message
+	 * count of the inbox is avaialble
+	 * 
+	 * onError: This is called when the msgIndexInfo returns null An index cache
+	 * has to be created for the inbox by calling createMessageIndex The Error
+	 * along with the error code is displayed to the user
+	 */
+
+	private class getMessageIndexInfoListener implements ATTIAMListener {
+
+		@Override
+		public void onSuccess(Object response) {
+			msgIndexInfo = (MessageIndexInfo) response;
+			if (null != msgIndexInfo) {
+				//getMessageList();
+				return;
+			}
+		}
+
+		@Override
+		public void onError(InAppMessagingError error) {
+			createMessageIndex();
+			Utils.toastOnError(getApplicationContext(), error);
+		}
+	}
+
+	/*
+	 * This operation allows the developer to create an index cache for the
+	 * subscriber�s inbox. authToken will be used to get access to
+	 * CreateMessageIndex of InApp Messaging.
+	 * 
+	 * The response will be handled by the listener :
+	 * createMessageIndexListener()
+	 */
+
+	public void createMessageIndex() {
+		iamManager = new IAMManager(Config.fqdn, authToken,
+				new createMessageIndexListener());
+		iamManager.CreateMessageIndex();
+	}
+
+	/*
+	 * createMessageIndexListener will be called on getting the response from
+	 * createMessageIndex()
+	 * 
+	 * onSuccess : This is called when the Index is created for the subscriber&#8217;s
+	 * inbox. A list of messages will be fetched from the GetMessageList of
+	 * InApp messaging.
+	 * 
+	 * onError: This is called when the index info is not created successfully
+	 * The Error along with the error code is displayed to the user
+	 */
+
+	private class createMessageIndexListener implements ATTIAMListener {
+
+		@Override
+		public void onSuccess(Object response) {
+			Boolean msg = (Boolean) response;
+			if (msg) {
+				//getMessageList();
+			}
+		}
+
+		@Override
+		public void onError(InAppMessagingError error) {
+			Utils.toastOnError(getApplicationContext(), error);
+			//dismissProgressDialog();
+		}
+	}
+	protected class sendMessageListener implements ATTIAMListener {
+		
+		@Override
+		public void onSuccess(Object arg0) {
+			SendResponse msg = (SendResponse) arg0;
+			if (null != msg) {
+				Toast toast = Toast.makeText(getApplicationContext(),
+						"Message Sent", Toast.LENGTH_SHORT);
+				toast.show();
+
+			}
+		}
+		
+		@Override
+		public void onError(InAppMessagingError error) {
+			dismissProgressDialog();
+			infoDialog("Message send failed !!"+ "\n" + error.getHttpResponse() , false );
+			Utils.toastOnError(getApplicationContext(), error);
+			Log.i("Message: sendMessageListener Error Callback ", error.getHttpResponse());
+
+		}
+	}
+
+	public void showProgressDialog(String dialogMessage) {
+
+		if (null == pDialog)
+			pDialog = new ProgressDialog(this);
+		pDialog.setCancelable(false);
+		pDialog.setMessage(dialogMessage);
+		pDialog.show();
+	}
+
+	public void dismissProgressDialog() {
+		if (null != pDialog) {
+			pDialog.dismiss();
+		}
+	}
+	// Info Dialog
+	protected void infoDialog(String message, final boolean doFinish) {
+		doDialog("Info: ", message, doFinish);
+	}
+
+	private void doDialog(String prefix, String message, final boolean doFinish) {
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+		alertDialogBuilder.setTitle(prefix);
+
+		// set dialog message
+		alertDialogBuilder.setMessage(message).setCancelable(false)
+				.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+
+						if (doFinish == true)
+							// if this button is clicked, Close the Application.
+							finish();
+						else
+							// if this button is clicked, just close the dialog
+							// box.
+							dialog.cancel();
+					}
+				});
+
+		// create alert dialog
+		AlertDialog alertDialog = alertDialogBuilder.create();
+		alertDialog.show();
+	}
 }
