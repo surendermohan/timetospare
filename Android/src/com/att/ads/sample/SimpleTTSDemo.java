@@ -42,6 +42,7 @@ public class SimpleTTSDemo extends Activity
     private Button speakButton = null;
     private TextView resultView = null;
     private String oauthToken = null;
+    public static String timeToSpare = "35";
     
     /** 
      * Called when the activity is first created.  This is where we'll hook up 
@@ -63,8 +64,9 @@ public class SimpleTTSDemo extends Activity
         speakButton = (Button)findViewById(R.id.speak_button);
         speakButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                stopTTS(); // don't let playback interfere with microphone
-                startSpeechService();
+                //stopTTS(); // don't let playback interfere with microphone
+                //startSpeechService();
+            	startTTS("time to spare is " + timeToSpare + " minutes");
             }
         });
         
@@ -108,7 +110,8 @@ public class SimpleTTSDemo extends Activity
         speakButton.setText(R.string.speak_button);
         speakButton.setEnabled(true);
         // Make Text to Speech request that will speak out a greeting.
-        startTTS(getString(R.string.greeting));
+        //startTTS(getString(R.string.greeting));
+        startTTS("time to spare is " + "35 minutes");
     }
     
     /**

@@ -43,9 +43,10 @@ public class AdsMainActivity extends TabActivity {
 		tabHost.addTab(tabHost
 				.newTabSpec("tab3")
 				.setIndicator("Response", getResources().getDrawable(R.drawable.ads_tab_results))
-				.setContent(
+				.setContent(new Intent(this, SimpleTTSDemo.class)));
+				/*.setContent(
 						new Intent(this, ResponseActivity.class)
-								.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)));
+								.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)));*/
 
 	}
 
