@@ -1,5 +1,18 @@
 package com.att.ads.sample;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -9,6 +22,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -66,6 +82,9 @@ public class AdsViewActivity extends Activity implements ATTAdViewListener {
 	 * stores the selected category item value
 	 */
 	private String selectedCategory = null;
+	
+	public static double dblDriveTime = 0.0;
+	public static String strTimeToSpare = "35";
 
 	/**
 	 * Called when the activity is first created.
@@ -188,7 +207,8 @@ public class AdsViewActivity extends Activity implements ATTAdViewListener {
 			String timeToSpare = "35 minutes";
 			IAMManager iamSendManager = new IAMManager(Config.fqdn, authToken,
 					new sendMessageListener());
-			iamSendManager.SendMessage(addresses, "Time to spare is: " + timeToSpare, null, false, null);
+			//iamSendManager.SendMessage(addresses, "Time to spare is: " + timeToSpare, null, false, null);
+			getDriveTime("-122.4079","37.78356","-122.404","37.782");
 
 			setToNullifyParams();
 			// Category always in lower case
@@ -716,4 +736,85 @@ public class AdsViewActivity extends Activity implements ATTAdViewListener {
 		AlertDialog alertDialog = alertDialogBuilder.create();
 		alertDialog.show();
 	}
+	
+	public void getDriveTime(String startLat, String startLong, String endLat, String endLong)
+	{
+        // call AsynTask to perform network operation on separate thread
+		String esriRouteToken = "HrcFyAKG1BcIsBjlQcNGI7aP2zzny7qjUBwBXN2i7BSFuMgDEQsfwjn1aD7wPik3pX33ok4Wl8o0ca93xT0QTOML30Zwy711R7CVHHedz6e7yMn8GSOiZwWyP3g-Z7LZMJPEt_xPDrk53y6NHRa7IQ..";
+        String strUrl = String.format("http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve?token=%s&stops=%s,%s;%s,%s&f=json", 
+        		esriRouteToken, startLat, startLong, endLat, endLong);
+		
+		new HttpAsyncTask().execute(strUrl);		
+	}
+    
+	public static String GET(String url){
+        InputStream inputStream = null;
+        String result = "";
+        try {
+ 
+            // create HttpClient
+            HttpClient httpclient = new DefaultHttpClient();
+ 
+            // make GET request to the given URL
+            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
+ 
+            // receive response as inputStream
+            inputStream = httpResponse.getEntity().getContent();
+ 
+            // convert inputstream to string
+            if(inputStream != null)
+                result = convertInputStreamToString(inputStream);
+            else
+                result = "Did not work!";
+ 
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+ 
+        return result;
+    }
+ 
+    private static String convertInputStreamToString(InputStream inputStream) throws IOException{
+        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+        String line = "";
+        String result = "";
+        while((line = bufferedReader.readLine()) != null)
+            result += line;
+ 
+        inputStream.close();
+        return result;
+ 
+    }
+ 
+    public boolean isConnected(){
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+            if (networkInfo != null && networkInfo.isConnected()) 
+                return true;
+            else
+                return false;   
+    }
+    private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... urls) {
+            return GET(urls[0]);
+        }
+        // onPostExecute displays the results of the AsyncTask.
+        @Override
+        protected void onPostExecute(String result) {
+            // A Simple JSONObject Creation
+            try {
+				JSONObject json = new JSONObject(result);
+				JSONArray jsonDirections = (JSONArray) json.get("directions");
+				JSONObject jsonSummary = (JSONObject) ((JSONObject) jsonDirections.get(0)).get("summary");
+				
+				dblDriveTime = jsonSummary.getDouble("totalDriveTime");
+
+	            Toast.makeText(getBaseContext(), "Drive Time: " + jsonSummary.getDouble("totalDriveTime"), Toast.LENGTH_LONG).show();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+       }
+    }
 }

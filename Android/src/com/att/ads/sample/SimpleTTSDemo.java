@@ -111,7 +111,7 @@ public class SimpleTTSDemo extends Activity
         speakButton.setEnabled(true);
         // Make Text to Speech request that will speak out a greeting.
         //startTTS(getString(R.string.greeting));
-        startTTS("time to spare is " + "35 minutes");
+        startTTS("time to spare is " + AdsViewActivity.strTimeToSpare +" minutes");
     }
     
     /**
