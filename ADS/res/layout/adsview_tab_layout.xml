@@ -9,6 +9,17 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" />
+    
+      <!-- com.triggertrap.seekarc.SeekArc
+        android:id="@+id/seekArc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="30dp"
+        seekarc:rotation="180"
+        seekarc:startAngle="30"
+        seekarc:sweepAngle="300"
+        seekarc:touchInside="true" /-->
 
     <TextView
         android:id="@+id/categoryTextView"

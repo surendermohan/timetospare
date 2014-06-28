@@ -28,8 +28,12 @@ public class AdsMainActivity extends TabActivity {
 		final TabHost tabHost = getTabHost();
 
 		// Create the tabs
+		/*
 		tabHost.addTab(tabHost.newTabSpec("tab1").setIndicator("AdView")
-				.setContent(new Intent(this, AdsViewActivity.class)));
+				.setContent(new Intent(this, AdsViewActivity.class)));*/
+		
+		tabHost.addTab(tabHost.newTabSpec("tab1").setIndicator("TimeView")
+				.setContent(new Intent(this, TimerViewActivity.class)));
 
 		tabHost.addTab(tabHost.newTabSpec("tab2")
 				.setIndicator("Settings", getResources().getDrawable(R.drawable.ads_tab_settings))

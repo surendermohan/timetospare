@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hello">Hello World, AdsSampleActivity!</string>
-    <string name="app_name">AT&amp;T Ad Sample</string>
-    <string	name="splash_message">AT&amp;T Ad Sample V1.0</string>
-	<string	name="splash_version_message">AT&amp;T Ad Sample V</string>
+    <string name="hello">Hello Dear User</string>
+    <string name="app_name">Time To Spare</string>
+    <string	name="splash_message">Time To Spare V1.0</string>
+	<string	name="splash_version_message">Time To Spare V</string>
     <string name="no_location_providers">Location Based services must be enabled to use Lat/Long. Please turn	them on in Settings or quit the application.</string>
     <string name="select_premium">Select Premium</string>
     <string name="appKey">8b859645847b01b6d0937d63c5083e697bd454848e104fe6c89649cae89d32a8a60b697a03b75312d7e593ba8f124329</string>

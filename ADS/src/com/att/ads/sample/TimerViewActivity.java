@@ -32,7 +32,7 @@ import com.att.ads.listeners.ATTAdViewListener;
  * @author ATT
  *
  */
-public class AdsViewActivity extends Activity implements ATTAdViewListener {
+public class TimerViewActivity extends Activity implements ATTAdViewListener {
 
 	private static final String TAG = "AdsViewActivity";
 	private TextView selectCategoryView = null;
