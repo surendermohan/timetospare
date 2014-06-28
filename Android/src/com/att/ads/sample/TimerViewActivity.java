@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -85,8 +86,9 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 	 */
 	private String selectedCategory = null;
 	
-	public static double dblDriveTime = 0.0;
-	public static String strTimeToSpare = "35";
+	public static long longDriveTime = 0;
+	public static long plannedEndTime = ((new Date()).getTime() + 120000);
+	public static long longTimeToSpare = 35;
 
 	/**
 	 * Called when the activity is first created.
@@ -230,7 +232,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		
 		IAMManager iamSendManager = new IAMManager(Config.fqdn, authToken,
 				new sendMessageListener());
-		iamSendManager.SendMessage(addresses, "Time to spare is: " + TimerViewActivity.strTimeToSpare, null, false, null);		
+		iamSendManager.SendMessage(addresses, String.format("Time to spare is: %d" + TimerViewActivity.longTimeToSpare), null, false, null);		
 	}
 
 	private void onSettingsChange() {
@@ -794,7 +796,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 	public void getDriveTime(String startLat, String startLong, String endLat, String endLong)
 	{
         // call AsynTask to perform network operation on separate thread
-		String esriRouteToken = "HrcFyAKG1BcIsBjlQcNGI7aP2zzny7qjUBwBXN2i7BSFuMgDEQsfwjn1aD7wPik3pX33ok4Wl8o0ca93xT0QTOML30Zwy711R7CVHHedz6e7yMn8GSOiZwWyP3g-Z7LZMJPEt_xPDrk53y6NHRa7IQ..";
+		String esriRouteToken = "aN-q5mN_Pjy4PyA0lf-zX4Zh0RILCo6ZEmKkCz4uoMMGjIk1gRY1ViPyi_dElojuZzDztD-vgPDEjW0tTVrGJpsoZJQ8ICRr1MBKOhCvELOVjX8Xs6bnmVVBocDxJI_cV46bGpCoiE2wux8awQTHhQ..";
         String strUrl = String.format("http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve?token=%s&stops=%s,%s;%s,%s&f=json", 
         		esriRouteToken, startLat, startLong, endLat, endLong);
 		
@@ -849,6 +851,12 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
                 return false;   
     }
     
+    public void RefreshTimeToSpare() {
+    	long timeNow = (new Date()).getTime();
+    	
+    	TimerViewActivity.longTimeToSpare = TimerViewActivity.plannedEndTime - TimerViewActivity.longDriveTime - timeNow;
+    }
+    
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
@@ -863,7 +871,9 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 				JSONArray jsonDirections = (JSONArray) json.get("directions");
 				JSONObject jsonSummary = (JSONObject) ((JSONObject) jsonDirections.get(0)).get("summary");
 				
-				dblDriveTime = jsonSummary.getDouble("totalDriveTime");
+				TimerViewActivity.longDriveTime = (int) jsonSummary.getDouble("totalDriveTime");
+				
+				RefreshTimeToSpare();
 
 	            Toast.makeText(getBaseContext(), "Drive Time: " + jsonSummary.getDouble("totalDriveTime"), Toast.LENGTH_LONG).show();
 			} catch (JSONException e) {
@@ -872,4 +882,6 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 			}
        }
     }
+    
+    
 }
