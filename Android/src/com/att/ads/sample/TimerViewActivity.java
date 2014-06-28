@@ -41,7 +41,8 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 	private String[] categoryItems = null;
 	private ATTAdView attAdView;
 	private LinearLayout adFrameLayout;
-	private ProgressBar adProgressBar;
+	private ProgressBar timerProgressBar;
+	private TextView timerTextView;
 	private String appKey = null;
 	private String secret = null;
 
