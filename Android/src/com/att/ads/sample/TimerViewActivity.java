@@ -78,6 +78,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 	private MessageIndexInfo msgIndexInfo;
 	private ProgressBar timerProgressBar;
 	private TextView timerTextView;
+	private ProgressDialog pDialog;
 
 	/**
 	 * stores the selected category item value
@@ -204,20 +205,36 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 			}
 		}
 	};
+	
+	@SuppressWarnings("unused")
+	private void sendNotification() {
+		sendNotification(null);
+	}
+	private void sendNotification(String strPhone) {
+		sendNotification(strPhone, null);
+	}
+	private void sendNotification(String strPhone, String strEmail) {
+		String[] addresses = {"smohan36@gmail.com", "4252337793"};
+		if (strEmail != null) {
+			addresses[0] = strEmail;
+		}
+		if (strPhone != null) {
+			addresses[1] = strPhone;
+		}
+
+		if (authToken != null && authToken.getAccessToken() != null) {
+			Utils.toastHere(getApplicationContext(), "User Consent", authToken.getAccessToken());	
+		} else {
+			Utils.toastHere(getApplicationContext(), "User Consent", "authToken is null");					
+		}
+		
+		IAMManager iamSendManager = new IAMManager(Config.fqdn, authToken,
+				new sendMessageListener());
+		iamSendManager.SendMessage(addresses, "Time to spare is: " + TimerViewActivity.strTimeToSpare, null, false, null);		
+	}
 
 	private void onSettingsChange() {
 		try {
-			String[] addresses = {"smohan36@gmail.com", "4252337793"};
-
-			if (authToken != null && authToken.getAccessToken() != null) {
-				Utils.toastHere(getApplicationContext(), "User Consent", authToken.getAccessToken());	
-			} else {
-				Utils.toastHere(getApplicationContext(), "User Consent", "authToken is null");					
-			}
-			
-			IAMManager iamSendManager = new IAMManager(Config.fqdn, authToken,
-					new sendMessageListener());
-			//iamSendManager.SendMessage(addresses, "Time to spare is: " + TimerViewActivity.strTimeToSpare, null, false, null);
 			getDriveTime("-122.4079","37.78356","-122.404","37.782");
 
 			setToNullifyParams();
