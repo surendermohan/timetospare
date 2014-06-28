@@ -56,6 +56,8 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.adsview_tab_layout);
 
+		
+		
 		categoryItems = getResources().getStringArray(R.array.categoryTypes);
 		selectedCategory = categoryItems[0];
 		adFrameLayout = (LinearLayout) findViewById(R.id.frameAdContent);
@@ -66,6 +68,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		selectCategoryView = (TextView) findViewById(R.id.selectCategory);
 		selectCategoryView.setText(selectedCategory);
 		selectCategoryView.setOnClickListener(onClickListener);
+		
 
 		/*
 		 * NOTE:
