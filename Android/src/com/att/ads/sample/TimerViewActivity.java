@@ -43,6 +43,7 @@ import android.widget.Toast;
 import com.att.ads.ATTAdView;
 import com.att.ads.ATTAdViewError;
 import com.att.ads.listeners.ATTAdViewListener;
+import com.att.ads.sample.AdsViewActivity.sendMessageListener;
 import com.att.api.error.InAppMessagingError;
 import com.att.api.immn.listener.ATTIAMListener;
 import com.att.api.immn.service.IAMManager;
@@ -103,6 +104,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		setContentView(R.layout.time_view_tab_layout);
 
 		adFrameLayout = (LinearLayout) findViewById(R.id.frameAdContent);
+		timerProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 		sendButton = (Button) findViewById(R.id.button1);
 		sendButton.setOnClickListener(onClickListener);
 		refreshButton = (Button) findViewById(R.id.button2);
@@ -112,6 +114,8 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		((Button) findViewById(R.id.buttonS3)).setOnClickListener(onClickListener);
 		((Button) findViewById(R.id.buttonS4)).setOnClickListener(onClickListener);
 		((Button) findViewById(R.id.buttonS5)).setOnClickListener(onClickListener);
+		
+		timerProgressBar.setMax(60);
 
 		/*
 		 * categoryItems = getResources().getStringArray(R.array.categoryTypes);
@@ -236,9 +240,12 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		}
 	};
 	
-	@SuppressWarnings("unused")
 	private void sendNotification() {
-		sendNotification(null);
+		String[] addresses = {"smohan36@gmail.com", "4252337793"};
+		
+		IAMManager iamSendManager = new IAMManager(Config.fqdn, authToken,
+				new sendMessageListener());
+		iamSendManager.SendMessage(addresses, String.format("Time to spare is: %d minutes.", TimerViewActivity.longTimeToSpare/60000), null, false, null);
 	}
 	private void sendNotification(String strPhone) {
 		sendNotification(strPhone, null);
@@ -887,6 +894,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
     	TextView tv = (TextView) findViewById(R.id.counter);
     	tv.setText(String.format("%d", (TimerViewActivity.longTimeToSpare/60000)));
     	tv.setTextColor(Color.parseColor("#000000"));
+    	timerProgressBar.setProgress((int)TimerViewActivity.longTimeToSpare/60000);
     }
     
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {

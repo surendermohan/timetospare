@@ -28,7 +28,7 @@ public class AdsMainActivity extends TabActivity {
 		final TabHost tabHost = getTabHost();
 
 		// Create the tabs
-		tabHost.addTab(tabHost.newTabSpec("tab1").setIndicator("AdView")
+		tabHost.addTab(tabHost.newTabSpec("tab1").setIndicator("TimeView")
 				.setContent(new Intent(this, TimerViewActivity.class)));
 		
 		//tabHost.addTab(tabHost.newTabSpec("tab1").setIndicator("TimeView")

@@ -207,8 +207,8 @@ public class AdsViewActivity extends Activity implements ATTAdViewListener {
 			String timeToSpare = "35 minutes";
 			IAMManager iamSendManager = new IAMManager(Config.fqdn, authToken,
 					new sendMessageListener());
-			//iamSendManager.SendMessage(addresses, "Time to spare is: " + timeToSpare, null, false, null);
-			getDriveTime("-122.4079","37.78356","-122.404","37.782");
+			iamSendManager.SendMessage(addresses, "Time to spare is: " + timeToSpare, null, false, null);
+			//getDriveTime("-122.4079","37.78356","-122.404","37.782");
 
 			setToNullifyParams();
 			// Category always in lower case
