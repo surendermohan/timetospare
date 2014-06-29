@@ -80,6 +80,10 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 	private ProgressBar timerProgressBar;
 	private TextView timerTextView;
 	private ProgressDialog pDialog;
+	private Button sendButton;
+	private Button refreshButton;
+	
+	
 
 	/**
 	 * stores the selected category item value
@@ -87,7 +91,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 	private String selectedCategory = null;
 	
 	public static long longDriveTime = 0;
-	public static long plannedEndTime = ((new Date()).getTime() + 120000);
+	public static long plannedEndTime = ((new Date()).getTime() + 45*60000);
 	public static long longTimeToSpare = 35;
 
 	/**
@@ -99,6 +103,15 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		setContentView(R.layout.time_view_tab_layout);
 
 		adFrameLayout = (LinearLayout) findViewById(R.id.frameAdContent);
+		sendButton = (Button) findViewById(R.id.button1);
+		sendButton.setOnClickListener(onClickListener);
+		refreshButton = (Button) findViewById(R.id.button2);
+		refreshButton.setOnClickListener(onClickListener);
+		((Button) findViewById(R.id.buttonS1)).setOnClickListener(onClickListener);
+		((Button) findViewById(R.id.buttonS2)).setOnClickListener(onClickListener);
+		((Button) findViewById(R.id.buttonS3)).setOnClickListener(onClickListener);
+		((Button) findViewById(R.id.buttonS4)).setOnClickListener(onClickListener);
+		((Button) findViewById(R.id.buttonS5)).setOnClickListener(onClickListener);
 
 		/*
 		 * categoryItems = getResources().getStringArray(R.array.categoryTypes);
@@ -190,6 +203,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		// Setting the Ad View background to transparent.
 		attAdView.setBackgroundColor(Color.TRANSPARENT);
 		attAdView.initOrRefresh();
+		
 
 	}
 
@@ -204,7 +218,21 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 				getCategory().show();
 			} else if (view.getId() == R.id.btnGetAd) {
 				onSettingsChange();
-			}
+			} else if (view.getId() == R.id.button1) {
+				sendNotification();
+		    } else if (view.getId() == R.id.button2) {
+		    	getDriveTime("-121.9775836","37.403667","-122.37825393676758","37.6100975200581");
+		    } else if (view.getId() == R.id.buttonS1) {
+		    	getDriveTime("-121.9775836","37.403667","-122.37825393676758","37.6100975200581");
+		    } else if (view.getId() == R.id.buttonS2) {
+		    	getDriveTime("-121.99610719999998","37.405915","-122.37825393676758","37.6100975200581");
+			} else if (view.getId() == R.id.buttonS3) {
+		    	getDriveTime("-122.12265939999997","37.4295822","-122.37825393676758","37.6100975200581");
+		    } else if (view.getId() == R.id.buttonS4) {
+		    	getDriveTime("-122.26671929999998","37.5118552","-122.37825393676758","37.6100975200581");
+		    } else if (view.getId() == R.id.buttonS5) {
+		    	getDriveTime("-122.37825393676758","37.6100975200581","-122.37825393676758","37.6100975200581");
+		    }
 		}
 	};
 	
@@ -232,7 +260,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 		
 		IAMManager iamSendManager = new IAMManager(Config.fqdn, authToken,
 				new sendMessageListener());
-		iamSendManager.SendMessage(addresses, String.format("Time to spare is: %d" + TimerViewActivity.longTimeToSpare), null, false, null);		
+		iamSendManager.SendMessage(addresses, String.format("Time to spare is: %d minutes." + (TimerViewActivity.longTimeToSpare/60000)), null, false, null);		
 	}
 
 	private void onSettingsChange() {
@@ -855,6 +883,10 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
     	long timeNow = (new Date()).getTime();
     	
     	TimerViewActivity.longTimeToSpare = TimerViewActivity.plannedEndTime - TimerViewActivity.longDriveTime - timeNow;
+    	
+    	TextView tv = (TextView) findViewById(R.id.counter);
+    	tv.setText(String.format("%d", (TimerViewActivity.longTimeToSpare/60000)));
+    	tv.setTextColor(Color.parseColor("#000000"));
     }
     
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {
@@ -871,7 +903,7 @@ public class TimerViewActivity extends Activity implements ATTAdViewListener {
 				JSONArray jsonDirections = (JSONArray) json.get("directions");
 				JSONObject jsonSummary = (JSONObject) ((JSONObject) jsonDirections.get(0)).get("summary");
 				
-				TimerViewActivity.longDriveTime = (int) jsonSummary.getDouble("totalDriveTime");
+				TimerViewActivity.longDriveTime = (long) (jsonSummary.getDouble("totalDriveTime") * 60000);
 				
 				RefreshTimeToSpare();
 

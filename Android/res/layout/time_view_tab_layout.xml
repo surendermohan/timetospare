@@ -27,7 +27,72 @@
         android:layout_below="@+id/frameAdContent"
         android:layout_marginTop="79dp"
         android:gravity="center"
-        android:text="00:00"
+        android:text="00"
         android:textSize="70sp" />
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/progressBar"
+        android:layout_marginLeft="14dp"
+        android:text="Send Message" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/button1"
+        android:layout_alignBottom="@+id/button1"
+        android:layout_alignParentRight="true"
+        android:text="Refresh" />
+
+    <Button
+        android:id="@+id/buttonS5"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="5" />
+
+    <Button
+        android:id="@+id/buttonS1"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="1" />
+
+    <Button
+        android:id="@+id/buttonS3"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="3" />
+
+    <Button
+        android:id="@+id/buttonS2"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="18dp"
+        android:layout_toLeftOf="@+id/buttonS3"
+        android:text="2" />
+
+    <Button
+        android:id="@+id/buttonS4"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="18dp"
+        android:layout_toRightOf="@+id/buttonS3"
+        android:text="4" />
 
 </RelativeLayout>

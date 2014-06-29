@@ -66,7 +66,7 @@ public class SimpleTTSDemo extends Activity
             public void onClick(View v) {
                 //stopTTS(); // don't let playback interfere with microphone
                 //startSpeechService();
-            	startTTS("time to spare is " + timeToSpare + " minutes");
+                startTTS(String.format("time to spare is %d minutes" + TimerViewActivity.longTimeToSpare));
             }
         });
         
@@ -111,7 +111,7 @@ public class SimpleTTSDemo extends Activity
         speakButton.setEnabled(true);
         // Make Text to Speech request that will speak out a greeting.
         //startTTS(getString(R.string.greeting));
-        startTTS("time to spare is " + AdsViewActivity.strTimeToSpare +" minutes");
+        startTTS(String.format("time to spare is %d minutes" + TimerViewActivity.longTimeToSpare));
     }
     
     /**
